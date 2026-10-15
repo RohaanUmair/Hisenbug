@@ -1,0 +1,123 @@
+@import "tailwindcss";
+/* Project documents aren't UI: keep their wording out of Tailwind's class scan */
+@source not "../docs";
+
+/* ---------------------------------------------------------------
+   Design tokens
+---------------------------------------------------------------- */
+@theme {
+  --font-sans: "Plus Jakarta Sans Variable", "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+
+  --color-ink: #080808;
+  --color-ink-900: #191919;
+  --color-ink-800: #101010;
+  --color-ink-700: #171717;
+  --color-ink-600: #262626;
+  --color-neutral-700: #404040;
+  --color-neutral-500: #737373;
+  --color-neutral-400: #a3a3a3;
+  --color-neutral-300: #9c9c9c;
+  --color-paper: #fafafa;
+  --color-paper-200: #f5f5f5;
+  --color-orange: #ff6a3d;
+  --color-violet: #6657ff;
+  --color-violet-link: #7a72ff;
+
+  --ease-flip: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* Fluid root scale: 1rem == 1vw on desktop,
+   so every rem value below scales fluidly with the viewport. */
+html { font-size: 1rem; }
+@media (min-width: 768px) { html { font-size: 1vw; } }
+@media (min-width: 1920px) { html { font-size: 0.8vw; } }
+
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+::-webkit-scrollbar { width: 0; }
+
+body {
+  margin: 0;
+  background: #080808;
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Resets live in the base layer so Tailwind utilities (text-*, bg-*, p-*) can override them.
+   (Preflight already neutralises <a> and <button>.) */
+@layer base {
+  button:not(:disabled), [role="button"]:not(:disabled) { cursor: pointer; }
+}
+::selection { background: #6657ff; color: #fff; }
+
+/* ---------------------------------------------------------------
+   Keyframes for the looping SVG illustrations (GPU-only: transform/opacity)
+---------------------------------------------------------------- */
+@keyframes hb-float { 0%,100% { transform: translate3d(0,0,0) } 50% { transform: translate3d(0,-0.9rem,0) } }
+@keyframes hb-float-r { 0%,100% { transform: translate3d(0,0,0) rotate(0) } 50% { transform: translate3d(0,-0.7rem,0) rotate(4deg) } }
+@keyframes hb-spin { to { transform: rotate(360deg) } }
+@keyframes hb-spin-rev { to { transform: rotate(-360deg) } }
+@keyframes hb-pulse { 0% { transform: scale(.6); opacity: .7 } 100% { transform: scale(1.6); opacity: 0 } }
+@keyframes hb-marquee-l { to { transform: translate3d(-50%,0,0) } }
+@keyframes hb-marquee-r { from { transform: translate3d(-50%,0,0) } to { transform: translate3d(0,0,0) } }
+@keyframes hb-dash { to { stroke-dashoffset: -200 } }
+@keyframes hb-flow { to { stroke-dashoffset: -26 } }
+@keyframes hb-blink { 0%,45% { opacity: 1 } 50%,95% { opacity: 0 } 100% { opacity: 1 } }
+@keyframes hb-scroll-page { 0%,12% { transform: translate3d(0,0,0) } 48%,60% { transform: translate3d(0,-38%,0) } 96%,100% { transform: translate3d(0,0,0) } }
+@keyframes hb-rise { 0% { transform: scaleY(.12) } 22%,78% { transform: scaleY(1) } 92%,100% { transform: scaleY(.12) } }
+@keyframes hb-tag { 0%,12% { opacity: 0; transform: scale(.6) } 22%,80% { opacity: 1; transform: scale(1) } 92%,100% { opacity: 0; transform: scale(.8) } }
+@keyframes hb-bar { 0%,100% { transform: scaleY(.35) } 50% { transform: scaleY(1) } }
+@keyframes hb-pop { 0%,8% { transform: scale(.4); opacity: 0 } 16%,70% { transform: scale(1); opacity: 1 } 80%,100% { transform: scale(.9); opacity: 0 } }
+@keyframes hb-slide-in { 0%,10% { transform: translate3d(0,1.2rem,0); opacity: 0 } 22%,72% { transform: translate3d(0,0,0); opacity: 1 } 84%,100% { transform: translate3d(0,-.6rem,0); opacity: 0 } }
+@keyframes hb-car { 0% { offset-distance: 0% } 100% { offset-distance: 100% } }
+@keyframes hb-type { 0% { transform: scaleX(0) } 60%,100% { transform: scaleX(1) } }
+@keyframes hb-progress { from { transform: scaleX(0) } to { transform: scaleX(1) } }
+@keyframes hb-swing { 0%,100% { transform: rotate(-3.5deg) } 50% { transform: rotate(3.5deg) } }
+@keyframes hb-orbit { to { transform: rotate(360deg) } }
+@keyframes hb-line { 0% { transform: scaleX(0); opacity: 1 } 14%,88% { transform: scaleX(1); opacity: 1 } 100% { transform: scaleX(1); opacity: 0 } }
+@keyframes hb-run { 0% { transform: translate3d(0,-100%,0) } 100% { transform: translate3d(0,420%,0) } }
+
+/* FillButton: colour layer clipped to a circle at the pointer; only the radius animates */
+@property --fill-r { syntax: '<length>'; inherits: false; initial-value: 0px; }
+.hb-fill {
+  clip-path: circle(var(--fill-r) at var(--fill-x, 50%) var(--fill-y, 50%));
+  transition: --fill-r .6s cubic-bezier(.45, 0, .55, 1);
+}
+
+/* CTA artwork: larger step labels and log lines on phones, where the art renders at ~350px */
+@media (max-width: 767px) {
+  .hb-cta-label { font-size: 13px; }
+  .hb-cta-log { font-size: 14px; }
+}
+
+/* Services spotlight: one light layer per card, centred on the pointer (Services.jsx sets --spot-x/y
+   on every card from one grid listener), faded in while the pointer is anywhere over the grid. */
+.hb-spot {
+  position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .5s;
+  background: radial-gradient(160px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+    rgb(255 255 255 / .135), rgb(255 255 255 / .015) 75%, rgb(255 255 255 / 0));
+}
+.hb-spot-area:hover .hb-spot { opacity: 1; }
+@keyframes hb-glow-spin { to { transform: rotate(360deg) } }
+
+.hb-float { animation: hb-float 6s ease-in-out infinite; }
+.hb-float-g { animation: hb-float 5s ease-in-out infinite; }
+.hb-float-r { animation: hb-float-r 7s ease-in-out infinite; }
+.hb-spin { animation: hb-spin 24s linear infinite; transform-origin: center; transform-box: fill-box; }
+.hb-spin-rev { animation: hb-spin-rev 32s linear infinite; transform-origin: center; transform-box: fill-box; }
+.hb-box { transform-origin: center; transform-box: fill-box; }
+
+/* looping animations pause while off-screen (toggled by useOffscreenAnimationPause) */
+.hb-paused, .hb-paused *, .hb-paused *::before, .hb-paused *::after { animation-play-state: paused !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+}
